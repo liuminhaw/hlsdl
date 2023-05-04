@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/canhlinh/hlsdl"
+	"github.com/liuminhaw/hlsdl"
 )
 
 func main() {

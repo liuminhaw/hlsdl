@@ -9,6 +9,10 @@ import (
 	"github.com/grafov/m3u8"
 )
 
+func ParseSegments(hlsURL string, headers map[string]string) ([]*Segment, error) {
+	return parseHlsSegments(hlsURL, headers)
+}
+
 func parseHlsSegments(hlsURL string, headers map[string]string) ([]*Segment, error) {
 	baseURL, err := url.Parse(hlsURL)
 	if err != nil {
