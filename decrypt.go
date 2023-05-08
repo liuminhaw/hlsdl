@@ -6,7 +6,9 @@ import (
 	"crypto/cipher"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 )
 
@@ -39,7 +41,7 @@ func pkcs5UnPadding(origData []byte) []byte {
 	return origData[:(length - unPadding)]
 }
 
-// Decrypt descryps a segment
+// decrypt descrypts a segment
 func (hlsDl *HlsDl) decrypt(segment *Segment) ([]byte, error) {
 
 	file, err := os.Open(segment.Path)
@@ -81,7 +83,7 @@ func (hlsDl *HlsDl) getKey(segment *Segment) (key []byte, iv []byte, err error) 
 	}
 
 	if res.StatusCode != 200 {
-		return nil, nil, errors.New("Failed to get descryption key")
+		return nil, nil, errors.New("failed to get descryption key")
 	}
 
 	key, err = ioutil.ReadAll(res.Body)
@@ -100,4 +102,53 @@ func defaultIV(seqID uint64) []byte {
 	buf := make([]byte, 16)
 	binary.BigEndian.PutUint64(buf[8:], seqID)
 	return buf
+}
+
+// Decrypt given segment
+func (s *Segment) Decrypt(headers map[string]string) ([]byte, error) {
+	var data []byte
+	copy(data, s.Data)
+	if s.Key != nil {
+		key, iv, err := s.getKey(headers)
+		if err != nil {
+			return nil, fmt.Errorf("segment Decrypt: %w", err)
+		}
+		data, err = decryptAES128(s.Data, key, iv)
+		if err != nil {
+			return nil, fmt.Errorf("segment Decrypt: %w", err)
+		}
+	}
+
+	for j := 0; j < len(data); j++ {
+		if data[j] == syncByte {
+			data = data[j:]
+			break
+		}
+	}
+	return data, nil
+}
+
+func (s *Segment) getKey(headers map[string]string) (key []byte, iv []byte, err error) {
+	client := &http.Client{}
+	req, err := newRequest(s.Key.URI, headers)
+	if err != nil {
+		return nil, nil, fmt.Errorf("segment getKey: %w", err)
+	}
+
+	resp, err := client.Do(req)
+	if resp.StatusCode != 200 {
+		return nil, nil, errors.New("failed to get descryption key")
+	}
+	defer resp.Body.Close()
+
+	key, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, fmt.Errorf("segment getKey: %w", err)
+	}
+
+	iv = []byte(s.Key.IV)
+	if len(iv) == 0 {
+		iv = defaultIV(s.SeqId)
+	}
+	return key, iv, nil
 }
