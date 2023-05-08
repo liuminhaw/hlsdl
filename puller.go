@@ -37,13 +37,13 @@ func pullSegment(hlsURL string, quitSignal chan os.Signal) chan *SegmentPuller {
 				return
 			}
 			if t != m3u8.MEDIA {
-				c <- &SegmentPuller{Err: errors.New("No support the m3u8 format")}
+				c <- &SegmentPuller{Err: errors.New("no support the m3u8 format")}
 				return
 			}
 
 			mediaList := p.(*m3u8.MediaPlaylist)
 			if mediaList.Closed {
-				c <- &SegmentPuller{Err: errors.New("The stream has been closed")}
+				c <- &SegmentPuller{Err: errors.New("the stream has been closed")}
 			}
 
 			duration := time.NewTicker(time.Duration(mediaList.TargetDuration) * time.Second)

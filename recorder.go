@@ -130,7 +130,7 @@ func (r *Recorder) getKey(segment *Segment) (key []byte, iv []byte, err error) {
 	}
 
 	if res.StatusCode != 200 {
-		return nil, nil, errors.New("Failed to get descryption key")
+		return nil, nil, errors.New("failed to get descryption key")
 	}
 
 	key, err = ioutil.ReadAll(res.Body)

@@ -16,7 +16,7 @@ func ParseSegments(hlsURL string, headers map[string]string) ([]*Segment, error)
 func parseHlsSegments(hlsURL string, headers map[string]string) ([]*Segment, error) {
 	baseURL, err := url.Parse(hlsURL)
 	if err != nil {
-		return nil, errors.New("Invalid m3u8 url")
+		return nil, errors.New("invalid m3u8 url")
 	}
 
 	p, t, err := getM3u8ListType(hlsURL, headers)
@@ -24,7 +24,7 @@ func parseHlsSegments(hlsURL string, headers map[string]string) ([]*Segment, err
 		return nil, err
 	}
 	if t != m3u8.MEDIA {
-		return nil, errors.New("No support the m3u8 format")
+		return nil, errors.New("no support the m3u8 format")
 	}
 
 	mediaList := p.(*m3u8.MediaPlaylist)

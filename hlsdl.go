@@ -1,6 +1,7 @@
 package hlsdl
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -37,6 +38,7 @@ type HlsDl struct {
 type Segment struct {
 	*m3u8.MediaSegment
 	Path string
+	Data []byte
 }
 
 type DownloadResult struct {
@@ -71,20 +73,35 @@ func wait(wg *sync.WaitGroup) chan bool {
 	return c
 }
 
+func (s *Segment) Download(headers map[string]string) error {
+	client := &http.Client{}
+	req, err := newRequest(s.URI, headers)
+	if err != nil {
+		return fmt.Errorf("segment Download: %w", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("segment Download: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return errors.New(resp.Status)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("segment Download: %w", err)
+	}
+	s.Data = data
+
+	return nil
+}
+
 func (hlsDl *HlsDl) downloadSegment(segment *Segment) error {
-	req, err := newRequest(segment.URI, hlsDl.headers)
-	if err != nil {
+	if err := segment.Download(hlsDl.headers); err != nil {
 		return err
-	}
-
-	res, err := hlsDl.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		return errors.New(res.Status)
 	}
 
 	file, err := os.Create(segment.Path)
@@ -93,7 +110,7 @@ func (hlsDl *HlsDl) downloadSegment(segment *Segment) error {
 	}
 	defer file.Close()
 
-	if _, err := io.Copy(file, res.Body); err != nil {
+	if _, err := io.Copy(file, bytes.NewReader(segment.Data)); err != nil {
 		return err
 	}
 
