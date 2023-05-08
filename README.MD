@@ -1,8 +1,15 @@
 # HLS downloader
 This is a library to support downloading a m3u8 file. All ts segments will be downloaded into a folder then be joined into a single TS file. Default file name is `video.ts`
 
+## About this project
+This project is forked from [canhlinh/hlsdl](https://github.com/canhlinh/hlsdl) and added some exported function for other program's usage
 
-### Features:
+### Exported functions / methods
+- `ParseSegments` function
+- Segment `Decrypt` method
+- Segment `Download` method
+
+## Features:
 * Concurrent download segments with multiple http connections
 * Decrypt hls encoded segments
 * Auto retry download
