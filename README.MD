@@ -1,5 +1,5 @@
 # HLS downloader
-This is a library to support downloading a m3u8 file. All ts segments will be downloaded into a folder then be joined into a single TS file. Default file name is `video.ts`
+This is a library to support downloading a m3u8 file. All ts segments will be downloaded into a folder then be joined into a single TS file. 
 
 ## About this project
 This project is forked from [canhlinh/hlsdl](https://github.com/canhlinh/hlsdl) and added some exported function for other program's usage
@@ -17,18 +17,15 @@ This project is forked from [canhlinh/hlsdl](https://github.com/canhlinh/hlsdl) 
 * Record a live stream video
 
 
-### Todo:
-* Allow adding http headers
-
 ### How to integrate this library to your code.
 
 Get the library
 ```
-go get github.com/canhlinh/hlsdl
+go get github.com/liuminhaw/hlsdl
 ```
 then import it to your code.
 ```
-import "github.com/canhlinh/hlsdl"
+import "github.com/liuminhaw/hlsdl"
 ```
 
 Sample:
@@ -39,7 +36,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/canhlinh/hlsdl"
+	"github.com/liuminhaw/hlsdl"
 )
 
 func main() {
@@ -85,4 +82,3 @@ Record a live stream video
 ./bin/hlsdl --url "http://cdn1.live-tv.od.ua:8081/bbb/bbbtv-abr/bbb/bbbtv-720p/chunks.m3u8?nimblesessionid=62115268" --record true
 ```
 
-## Get prebuild here https://github.com/canhlinh/hlsdl/releases *
