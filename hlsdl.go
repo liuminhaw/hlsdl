@@ -73,34 +73,34 @@ func wait(wg *sync.WaitGroup) chan bool {
 	return c
 }
 
-func (s *Segment) Download(headers map[string]string) error {
+func (s *Segment) Download(headers map[string]string) (int, error) {
 	client := &http.Client{}
 	req, err := newRequest(s.URI, headers)
 	if err != nil {
-		return fmt.Errorf("segment Download: %w", err)
+		return 538, fmt.Errorf("segment Download: %w", err)
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("segment Download: %w", err)
+		return 538, fmt.Errorf("segment Download: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return errors.New(resp.Status)
+		return resp.StatusCode, errors.New(resp.Status)
 	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("segment Download: %w", err)
+		return resp.StatusCode, fmt.Errorf("segment Download: %w", err)
 	}
 	s.Data = data
 
-	return nil
+	return resp.StatusCode, nil
 }
 
 func (hlsDl *HlsDl) downloadSegment(segment *Segment) error {
-	if err := segment.Download(hlsDl.headers); err != nil {
+	if _, err := segment.Download(hlsDl.headers); err != nil {
 		return err
 	}
 
@@ -222,7 +222,8 @@ func (hlsDl *HlsDl) join(dir string, segments []*Segment) (string, error) {
 
 	for _, segment := range segments {
 
-		d, err := hlsDl.decrypt(segment)
+		// d, err := hlsDl.decrypt(segment)
+		d, err := segment.Decrypt(hlsDl.headers)
 		if err != nil {
 			return "", err
 		}

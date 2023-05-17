@@ -106,14 +106,14 @@ func defaultIV(seqID uint64) []byte {
 
 // Decrypt given segment
 func (s *Segment) Decrypt(headers map[string]string) ([]byte, error) {
-	var data []byte
+	var data = make([]byte, len(s.Data))
 	copy(data, s.Data)
 	if s.Key != nil {
 		key, iv, err := s.getKey(headers)
 		if err != nil {
 			return nil, fmt.Errorf("segment Decrypt: %w", err)
 		}
-		data, err = decryptAES128(s.Data, key, iv)
+		data, err = decryptAES128(data, key, iv)
 		if err != nil {
 			return nil, fmt.Errorf("segment Decrypt: %w", err)
 		}

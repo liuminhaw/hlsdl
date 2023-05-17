@@ -68,6 +68,9 @@ func newRequest(url string, headers map[string]string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+	if headers == nil {
+		headers = map[string]string{}
+	}
 	for key, value := range headers {
 		req.Header.Set(key, value)
 	}
